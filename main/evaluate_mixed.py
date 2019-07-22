@@ -71,6 +71,7 @@ def get_seqs(p1, p2, ngram_words, word_words, params):
 
         return np1.embeddings, wp1.embeddings, lp1.embeddings, np2.embeddings, wp2.embeddings, lp2.embeddings
 
+
 def get_correlation(model, ngram_words, word_words, f, params):
     f = io.open(f, 'r', encoding='utf-8')
     lines = f.readlines()
@@ -142,8 +143,8 @@ def evaluate_all(model, ngram_words, word_words, params):
     prefix = "../data/"
     parr = []; sarr = []
 
-    farr = ["annotated-ppdb-dev",
-            "annotated-ppdb-test"]
+    farr = ["sts-dev",
+            "sts-test"]
 
     for i in farr:
         p,s = get_correlation(model, ngram_words, word_words, prefix + i, params)

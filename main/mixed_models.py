@@ -10,6 +10,8 @@ from theano import tensor as T
 from evaluate_mixed import evaluate_all
 from lasagne_layers import lasagne_add_layer
 from lasagne_layers import lasagne_average_layer
+from example import example
+
 
 class mixed_models(object):
 
@@ -369,6 +371,101 @@ class mixed_models(object):
             self.cost_function = theano.function(ng_inputs + wd_inputs + lstm_inputs, cost)
 
         print "Num Params:", lasagne.layers.count_params(self.final_layer)
+
+    def predict(self, data, ngram_words, word_words, params):
+        start_time = time.time()
+        evaluate_all(self, ngram_words, word_words, params)
+        end_time = time.time()
+        print "total time:", (end_time - start_time)
+
+    def get_seqs(self, p1, p2, ngram_words, word_words, params):
+
+        if params.combination_type == "ngram-word":
+
+            np1 = example(p1)
+            np2 = example(p2)
+
+            wp1 = example(p1)
+            wp2 = example(p2)
+
+            np1.populate_embeddings_ngrams(ngram_words, 3, True)
+            np2.populate_embeddings_ngrams(ngram_words, 3, True)
+            wp1.populate_embeddings(word_words, True)
+            wp2.populate_embeddings(word_words, True)
+
+            return np1.embeddings, wp1.embeddings, np2.embeddings, wp2.embeddings
+
+        elif params.combination_type == "ngram-lstm":
+
+            np1 = example(p1)
+            np2 = example(p2)
+
+            wp1 = example(p1)
+            wp2 = example(p2)
+
+            np1.populate_embeddings_ngrams(ngram_words, 3, True)
+            np2.populate_embeddings_ngrams(ngram_words, 3, True)
+            wp1.populate_embeddings(word_words, True)
+            wp2.populate_embeddings(word_words, True)
+
+            return np1.embeddings, wp1.embeddings, np2.embeddings, wp2.embeddings
+
+        elif params.combination_type == "word-lstm":
+
+            np1 = example(p1)
+            np2 = example(p2)
+
+            wp1 = example(p1)
+            wp2 = example(p2)
+
+            np1.populate_embeddings(word_words, True)
+            np2.populate_embeddings(word_words, True)
+            wp1.populate_embeddings(word_words, True)
+            wp2.populate_embeddings(word_words, True)
+
+            return np1.embeddings, wp1.embeddings, np2.embeddings, wp2.embeddings
+
+        elif params.combination_type == "ngram-word-lstm":
+
+            np1 = example(p1)
+            np2 = example(p2)
+
+            wp1 = example(p1)
+            wp2 = example(p2)
+
+            lp1 = example(p1)
+            lp2 = example(p2)
+
+            np1.populate_embeddings_ngrams(ngram_words, 3, True)
+            np2.populate_embeddings_ngrams(ngram_words, 3, True)
+            wp1.populate_embeddings(word_words, True)
+            wp2.populate_embeddings(word_words, True)
+            lp1.populate_embeddings(word_words, True)
+            lp2.populate_embeddings(word_words, True)
+
+            return np1.embeddings, wp1.embeddings, lp1.embeddings, np2.embeddings, wp2.embeddings, lp2.embeddings
+
+    def predict_pairs(self, s1, s2, ngram_words, word_words, params):
+
+        if params.combination_type != "ngram-word-lstm":
+            nX1, wX1, nX2, wX2 = self.get_seqs(s1, s2, ngram_words, word_words, params)
+        else:
+            nX1, wX1, lX1, nX2, wX2, lX2 = self.get_seqs(s1, s2, ngram_words, word_words, params)
+        nx1, nm1 = self.prepare_data([nX1])
+        wx1, wm1 = self.prepare_data([wX1])
+        nx2, nm2 = self.prepare_data([nX2])
+        wx2, wm2 = self.prepare_data([wX2])
+        if params.combination_type == "ngram-word-lstm":
+            lx1, lm1 = self.prepare_data([lX1])
+            lx2, lm2 = self.prepare_data([lX2])
+        if params.combination_type != "ngram-word-lstm":
+            scores = self.scoring_function(nx1,nm1,wx1,wm1,nx2,nm2,wx2,wm2)
+        else:
+            scores = self.scoring_function(nx1, nm1, wx1, wm1, lx1, lm1,
+                                            nx2, nm2, wx2, wm2, lx2, lm2)
+        return scores
+
+            
 
     def train(self, data, ngram_words, word_words, params):
 

@@ -210,6 +210,21 @@ class models(object):
 
         print "Num Params:", lasagne.layers.count_params(self.final_layer)
 
+
+    def predict(self, data, words, params):
+        start_time = time.time()
+        evaluate_all(self, words, params)
+        end_time = time.time()
+        print "total time:", (end_time - start_time)
+
+    def embed_sentence(self, s1, params):
+        score = 0
+        return score
+        
+    def predict_pairs(self, s1, s2, params):
+        score = 0
+        return score
+
     def train(self, data, words, params):
 
         start_time = time.time()
