@@ -1,5 +1,11 @@
 # para-nmt-50m
 
+#how to use:
+
+```
+python main/test.py -combination_type ngram-word -combination_method concat -loadmodel data/ngram-word-concat-40.pickle -margin 0.4
+```
+
 Code to train models from "Pushing the Limits of Paraphrastic Sentence Embeddings with Millions of Machine Translations".
 
 The code is written in python and requires numpy, scipy, theano, and the lasagne libraries.
