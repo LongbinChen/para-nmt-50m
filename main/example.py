@@ -7,9 +7,12 @@ tbl = dict.fromkeys(i for i in xrange(sys.maxunicode)
 
 def lookup(words,w):
     w = w.lower()
+
     if w in words:
         return words[w]
     else:
+        if isinstance(w, str):
+            print "w needs to be a unicode"
         w = w.translate(tbl)
         if w in words:
             return words[w]
